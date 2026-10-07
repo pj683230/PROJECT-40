@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Home Energy Advisor — Powered by IBM Granite</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ── NAV ─────────────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <span class="brand-name">EnergyAdvisor</span>
+          <span class="brand-sub">Powered by IBM Granite</span>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#appliances">Appliances</a></li>
+        <li><a href="#billing">Bill Estimator</a></li>
+        <li><a href="#advisor">AI Advisor</a></li>
+        <li><a href="#tips">Tips</a></li>
+      </ul>
+      <button class="nav-cta" onclick="document.getElementById('advisor').scrollIntoView({behavior:'smooth'})">Ask AI</button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">IBM Bob · IBM Cloud · IBM Granite</div>
+      <h1>Smart Home<br/><span class="accent">Energy Advisor</span></h1>
+      <p class="hero-sub">AI-powered analysis of your household electricity consumption. Get personalized recommendations, appliance insights, bill predictions, and energy-saving strategies — all in real time.</p>
+      <div class="hero-cta-row">
+        <button class="btn-primary" onclick="startDemo()">▶ Run Live Analysis</button>
+        <button class="btn-outline" onclick="document.getElementById('advisor').scrollIntoView({behavior:'smooth'})">Chat with AI Advisor</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><span class="hstat-val" id="hs-saved">0</span><span class="hstat-lbl">kWh Saved</span></div>
+        <div class="hstat"><span class="hstat-val" id="hs-bill">₹0</span><span class="hstat-lbl">Estimated Bill</span></div>
+        <div class="hstat"><span class="hstat-val" id="hs-score">0</span><span class="hstat-lbl">Efficiency Score</span></div>
+        <div class="hstat"><span class="hstat-val" id="hs-co2">0 kg</span><span class="hstat-lbl">CO₂ Reduced</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="house-card">
+        <div class="house-header">🏠 My Home — Current Status</div>
+        <div class="house-meters">
+          <div class="meter-row">
+            <span>Live Draw</span>
+            <div class="meter-bar"><div class="meter-fill" id="m-live" style="width:62%"></div></div>
+            <span id="m-live-val">3.1 kW</span>
+          </div>
+          <div class="meter-row">
+            <span>Daily Usage</span>
+            <div class="meter-bar"><div class="meter-fill warning" id="m-daily" style="width:74%"></div></div>
+            <span id="m-daily-val">18.5 kWh</span>
+          </div>
+          <div class="meter-row">
+            <span>Peak Load</span>
+            <div class="meter-bar"><div class="meter-fill danger" id="m-peak" style="width:88%"></div></div>
+            <span id="m-peak-val">4.4 kW</span>
+          </div>
+          <div class="meter-row">
+            <span>Solar Offset</span>
+            <div class="meter-bar"><div class="meter-fill good" id="m-solar" style="width:31%"></div></div>
+            <span id="m-solar-val">1.6 kW</span>
+          </div>
+        </div>
+        <div class="pulse-indicator">● Live Monitoring Active</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── DASHBOARD ─────────────────────────────────────────────────── -->
+  <section id="dashboard" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>Energy Consumption Dashboard</h2>
+        <p>Real-time household electricity usage analysis powered by IBM Cloud smart-meter ingestion pipeline</p>
+      </div>
+
+      <!-- Profile selector -->
+      <div class="profile-bar">
+        <span class="profile-label">Household Profile:</span>
+        <div class="profile-tabs">
+          <button class="ptab active" onclick="switchProfile('low', this)">Low Usage</button>
+          <button class="ptab" onclick="switchProfile('medium', this)">Average</button>
+          <button class="ptab" onclick="switchProfile('high', this)">High Usage</button>
+          <button class="ptab" onclick="switchProfile('custom', this)">Custom</button>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-val" id="kpi-monthly">385 kWh</div>
+          <div class="kpi-lbl">Monthly Usage</div>
+          <div class="kpi-delta up" id="kpi-monthly-d">▲ 8% vs last month</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-val" id="kpi-bill">₹2,695</div>
+          <div class="kpi-lbl">Projected Bill</div>
+          <div class="kpi-delta up" id="kpi-bill-d">▲ ₹216 over average</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">🏆</div>
+          <div class="kpi-val" id="kpi-eff">67%</div>
+          <div class="kpi-lbl">Efficiency Score</div>
+          <div class="kpi-delta down" id="kpi-eff-d">▼ Needs improvement</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">🌿</div>
+          <div class="kpi-val" id="kpi-co2">308 kg</div>
+          <div class="kpi-lbl">CO₂ Footprint</div>
+          <div class="kpi-delta up" id="kpi-co2-d">▲ Above avg household</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-row">
+        <!-- Hourly chart -->
+        <div class="chart-card wide">
+          <div class="chart-title">Hourly Consumption Pattern (kWh)</div>
+          <div class="chart-container">
+            <canvas id="hourlyChart" width="600" height="220"></canvas>
+          </div>
+        </div>
+        <!-- Weekly chart -->
+        <div class="chart-card">
+          <div class="chart-title">7-Day Trend (kWh/day)</div>
+          <div class="chart-container">
+            <canvas id="weeklyChart" width="280" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peak alert -->
+      <div class="alert-banner" id="peak-alert">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-body">
+          <strong>Peak Hour Alert</strong> — Your highest consumption occurs between <strong>6 PM – 10 PM</strong>. Shifting heavy appliances outside this window could save <strong>₹340/month</strong>.
+        </div>
+        <button class="alert-action" onclick="document.getElementById('advisor').scrollIntoView({behavior:'smooth'})">Get Plan</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── APPLIANCES ─────────────────────────────────────────────────── -->
+  <section id="appliances" class="section alt-bg">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>Appliance Usage Insights</h2>
+        <p>IBM Granite-powered disaggregation identifies per-device consumption from aggregate meter readings</p>
+      </div>
+
+      <div class="appliance-controls">
+        <input type="text" id="app-search" placeholder="🔍 Search appliances..." oninput="filterAppliances(this.value)" />
+        <select id="app-sort" onchange="sortAppliances(this.value)">
+          <option value="energy">Sort by Energy</option>
+          <option value="cost">Sort by Cost</option>
+          <option value="name">Sort by Name</option>
+        </select>
+      </div>
+
+      <div class="appliance-grid" id="applianceGrid"></div>
+
+      <!-- Donut chart -->
+      <div class="donut-section">
+        <div class="donut-wrap">
+          <canvas id="donutChart" width="260" height="260"></canvas>
+        </div>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BILLING ─────────────────────────────────────────────────────── -->
+  <section id="billing" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>Electricity Bill Estimator</h2>
+        <p>Accurate monthly bill prediction using current tariff slabs and your real usage patterns</p>
+      </div>
+
+      <div class="billing-layout">
+        <!-- Sliders -->
+        <div class="billing-inputs">
+          <h3>Usage Parameters</h3>
+          <div class="slider-group">
+            <label>Daily Average Usage <span id="sl-daily-val" class="sl-val">18 kWh</span></label>
+            <input type="range" min="5" max="60" value="18" id="sl-daily" oninput="recalcBill()" />
+          </div>
+          <div class="slider-group">
+            <label>Peak Hour Usage % <span id="sl-peak-val" class="sl-val">35%</span></label>
+            <input type="range" min="10" max="80" value="35" id="sl-peak" oninput="recalcBill()" />
+          </div>
+          <div class="slider-group">
+            <label>Solar Generation (kWh/day) <span id="sl-solar-val" class="sl-val">2 kWh</span></label>
+            <input type="range" min="0" max="20" value="2" id="sl-solar" oninput="recalcBill()" />
+          </div>
+          <div class="slider-group">
+            <label>Household Size (members) <span id="sl-members-val" class="sl-val">4</span></label>
+            <input type="range" min="1" max="10" value="4" id="sl-members" oninput="recalcBill()" />
+          </div>
+          <div class="tariff-select">
+            <label>Tariff Zone</label>
+            <select id="tariff-zone" onchange="recalcBill()">
+              <option value="urban">Urban (₹7/kWh avg)</option>
+              <option value="suburban">Suburban (₹6/kWh avg)</option>
+              <option value="rural">Rural (₹5/kWh avg)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bill breakdown -->
+        <div class="billing-result">
+          <div class="bill-card">
+            <div class="bill-month">Estimated Bill — <span id="bill-month-name">July 2025</span></div>
+            <div class="bill-amount" id="bill-total">₹2,695</div>
+            <div class="bill-breakdown">
+              <div class="bb-row"><span>Base Consumption</span><span id="bb-base">₹2,100</span></div>
+              <div class="bb-row"><span>Peak Hour Surcharge</span><span id="bb-peak">₹595</span></div>
+              <div class="bb-row credit"><span>Solar Credit</span><span id="bb-solar">−₹280</span></div>
+              <div class="bb-row"><span>Fixed Charges</span><span id="bb-fixed">₹280</span></div>
+              <div class="bb-row total"><span>Total</span><span id="bb-total">₹2,695</span></div>
+            </div>
+            <div class="bill-compare">
+              <div class="bc-item"><div class="bc-label">Your Bill</div><div class="bc-bar"><div class="bc-fill you" id="bc-you" style="width:72%"></div></div><div class="bc-amt" id="bc-you-amt">₹2,695</div></div>
+              <div class="bc-item"><div class="bc-label">Avg Neighbor</div><div class="bc-bar"><div class="bc-fill avg" style="width:55%"></div></div><div class="bc-amt">₹2,100</div></div>
+              <div class="bc-item"><div class="bc-label">Best Practice</div><div class="bc-bar"><div class="bc-fill best" style="width:35%"></div></div><div class="bc-amt">₹1,320</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AI ADVISOR ─────────────────────────────────────────────────── -->
+  <section id="advisor" class="section alt-bg">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>IBM Granite AI Advisor</h2>
+        <p>Conversational energy intelligence — ask anything about your home's energy consumption</p>
+      </div>
+
+      <div class="chat-layout">
+        <div class="chat-sidebar">
+          <h4>Quick Questions</h4>
+          <div class="quick-btns">
+            <button onclick="askQuestion('Which appliances are consuming the most energy?')">🔌 Top Energy Hogs</button>
+            <button onclick="askQuestion('How can I reduce my peak hour usage?')">⏰ Reduce Peak Usage</button>
+            <button onclick="askQuestion('What is my estimated monthly electricity bill?')">💰 Bill Estimate</button>
+            <button onclick="askQuestion('Give me a 7-day energy saving plan')">📅 7-Day Plan</button>
+            <button onclick="askQuestion('Should I upgrade my AC to a 5-star rating?')">❄️ AC Upgrade Advice</button>
+            <button onclick="askQuestion('How much can solar panels save me?')">☀️ Solar Savings</button>
+            <button onclick="askQuestion('What are the best energy saving habits?')">✅ Best Habits</button>
+            <button onclick="askQuestion('Compare my usage with neighbors')">📊 Neighbor Comparison</button>
+          </div>
+          <div class="ai-model-info">
+            <div class="ami-label">AI Model</div>
+            <div class="ami-val">IBM Granite 3.3</div>
+            <div class="ami-label">Platform</div>
+            <div class="ami-val">IBM watsonx.ai</div>
+            <div class="ami-label">Data Source</div>
+            <div class="ami-val">IBM Cloud IoT Hub</div>
+          </div>
+        </div>
+
+        <div class="chat-main">
+          <div class="chat-messages" id="chatMessages">
+            <div class="msg ai">
+              <div class="msg-avatar">🤖</div>
+              <div class="msg-bubble">
+                <strong>IBM Granite Energy Advisor</strong><br/>
+                Hello! I'm your AI-powered Smart Home Energy Advisor, built on <strong>IBM Granite</strong> and running on <strong>IBM Cloud</strong>. I've analyzed your home's energy data from the smart meter.<br/><br/>
+                📊 <strong>Current Status:</strong> Your monthly usage is <strong>385 kWh</strong>, which is 18% above the neighborhood average.<br/>
+                💡 I have <strong>7 personalized recommendations</strong> ready for you.<br/><br/>
+                How can I help you optimize your energy usage today?
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" id="chatInput" placeholder="Ask about your energy usage..." onkeydown="if(event.key==='Enter') sendMessage()" />
+            <button class="send-btn" onclick="sendMessage()">Send ➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TIPS / RECOMMENDATIONS ─────────────────────────────────────── -->
+  <section id="tips" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>Energy Efficiency Recommendations</h2>
+        <p>Personalized action plan generated by IBM Granite based on your consumption behavior</p>
+      </div>
+
+      <div class="rec-filter-row">
+        <button class="rec-filter active" data-cat="all" onclick="filterRecs('all', this)">All</button>
+        <button class="rec-filter" data-cat="habits" onclick="filterRecs('habits', this)">Daily Habits</button>
+        <button class="rec-filter" data-cat="scheduling" onclick="filterRecs('scheduling', this)">Scheduling</button>
+        <button class="rec-filter" data-cat="upgrade" onclick="filterRecs('upgrade', this)">Upgrades</button>
+        <button class="rec-filter" data-cat="solar" onclick="filterRecs('solar', this)">Solar & Green</button>
+      </div>
+
+      <div class="rec-grid" id="recGrid"></div>
+
+      <!-- Savings projection -->
+      <div class="savings-projection">
+        <h3>Projected Savings if All Recommendations Followed</h3>
+        <div class="savings-bars">
+          <div class="sbar-row">
+            <span>Month 1</span>
+            <div class="sbar"><div class="sbar-fill" style="width:25%"></div></div>
+            <span>₹320 saved</span>
+          </div>
+          <div class="sbar-row">
+            <span>Month 3</span>
+            <div class="sbar"><div class="sbar-fill" style="width:48%"></div></div>
+            <span>₹620 saved</span>
+          </div>
+          <div class="sbar-row">
+            <span>Month 6</span>
+            <div class="sbar"><div class="sbar-fill" style="width:65%"></div></div>
+            <span>₹840 saved</span>
+          </div>
+          <div class="sbar-row">
+            <span>Year 1</span>
+            <div class="sbar"><div class="sbar-fill good" style="width:85%"></div></div>
+            <span>₹9,840 saved</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="fb-name">⚡ Smart Home Energy Advisor</div>
+        <div class="fb-sub">Problem Statement #16 · IBM Bob + IBM Cloud + IBM Granite</div>
+      </div>
+      <div class="footer-links">
+        <div class="fl-col">
+          <div class="fl-head">Platform</div>
+          <div>IBM Bob</div>
+          <div>IBM Cloud</div>
+          <div>IBM Granite 3.3</div>
+          <div>IBM watsonx.ai</div>
+        </div>
+        <div class="fl-col">
+          <div class="fl-head">Features</div>
+          <div>Smart Meter Analysis</div>
+          <div>AI Recommendations</div>
+          <div>Bill Estimation</div>
+          <div>Appliance Insights</div>
+        </div>
+        <div class="fl-col">
+          <div class="fl-head">Data</div>
+          <div>IBM IoT Hub</div>
+          <div>Real-time Monitoring</div>
+          <div>Tariff Intelligence</div>
+          <div>CO₂ Tracking</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 Smart Home Energy Advisor · Built with IBM Bob, IBM Cloud & IBM Granite · All rights reserved</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
